@@ -7,13 +7,14 @@ import {
   deleteCandidate,
   getStats,
 } from '../controllers/candidateController.js';
+import upload from '../middleware/upload.js';
 
 const router = express.Router();
 
 router.get('/stats', getStats);
 
 // crud
-router.post('/', newCandidate);
+router.post('/', upload.single('resume'), newCandidate);
 router.get('/', getAlCandidates);
 router.get('/:id', getCandidate);
 router.put('/:id/status', updateCandidateStatus);
