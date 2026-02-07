@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import candidateRoutes from './routes/candidateRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 
 dotenv.config();
 
@@ -13,8 +14,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
 app.use('/uploads', express.static('uploads'));
+app.use('/api/auth', authRoutes);
 app.use('/api/candidates', candidateRoutes);
 
 const connectDB = async () => {
