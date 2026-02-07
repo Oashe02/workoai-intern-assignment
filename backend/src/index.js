@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import candidateRoutes from './routes/candidateRoutes.js';
 
 dotenv.config();
 
@@ -11,6 +12,9 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+
+app.use('/api/candidates', candidateRoutes);
 
 const connectDB = async () => {
   try {
@@ -22,7 +26,6 @@ const connectDB = async () => {
 };
 
 
-// Start server
 const startServer = async () => {
   await connectDB();
   app.listen(PORT, () => {
