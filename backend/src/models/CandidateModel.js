@@ -36,7 +36,11 @@ const candidateSchema = new mongoose.Schema(
       },
       default: 'Pending',
     },
-    resumeUrl: {
+    resumeData: {
+      type: String, // Base64 encoded PDF
+      default: null,
+    },
+    resumeFilename: {
       type: String,
       default: null,
     },

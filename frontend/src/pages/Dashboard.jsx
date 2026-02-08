@@ -18,6 +18,7 @@ import {
     IconUsers,
     IconArrowUpRight,
     IconTrendingUp,
+    IconFileText,
 } from '@tabler/icons-react';
 
 const TopNavbar = () => (
@@ -126,10 +127,47 @@ const Modal = ({ isOpen, onClose, title, children }) => (
 
 const ReferralForm = ({ onSubmit, loading }) => {
     const [formData, setFormData] = useState({ name: '', email: '', phone: '', jobTitle: '' });
+    const [resumeFile, setResumeFile] = useState(null);
+    const [resumeError, setResumeError] = useState('');
 
-    const handleSubmit = (e) => {
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.type !== 'application/pdf') {
+                setResumeError('Only PDF files are allowed');
+                setResumeFile(null);
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                setResumeError('File size must be less than 5MB');
+                setResumeFile(null);
+                return;
+            }
+            setResumeError('');
+            setResumeFile(file);
+        }
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        onSubmit(formData);
+        
+        let resumeData = null;
+        let resumeFilename = null;
+        
+        if (resumeFile) {
+            // Convert file to base64
+            const reader = new FileReader();
+            resumeData = await new Promise((resolve) => {
+                reader.onload = () => {
+                    const base64 = reader.result.split(',')[1]; // Remove data:application/pdf;base64, prefix
+                    resolve(base64);
+                };
+                reader.readAsDataURL(resumeFile);
+            });
+            resumeFilename = resumeFile.name;
+        }
+        
+        onSubmit({ ...formData, resumeData, resumeFilename });
     };
 
     const inputClass = "w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all";
@@ -155,6 +193,49 @@ const ReferralForm = ({ onSubmit, loading }) => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
                 <input type="tel" required placeholder="+1 (555) 000-0000" value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className={inputClass} />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Resume (PDF)</label>
+                <div className="relative">
+                    <input 
+                        type="file" 
+                        accept=".pdf,application/pdf"
+                        onChange={handleFileChange}
+                        className="hidden"
+                        id="resume-upload"
+                    />
+                    <label 
+                        htmlFor="resume-upload"
+                        className={cn(
+                            "flex items-center gap-3 w-full px-4 py-3 bg-gray-50 border border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition-all",
+                            resumeFile && "border-emerald-400 bg-emerald-50/50"
+                        )}
+                    >
+                        <div className={cn(
+                            "w-10 h-10 rounded-lg flex items-center justify-center",
+                            resumeFile ? "bg-emerald-100" : "bg-gray-200"
+                        )}>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke={resumeFile ? "#059669" : "#6B7280"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                <polyline points="14,2 14,8 20,8" stroke={resumeFile ? "#059669" : "#6B7280"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                        </div>
+                        <div className="flex-1">
+                            {resumeFile ? (
+                                <>
+                                    <p className="text-sm font-medium text-emerald-700">{resumeFile.name}</p>
+                                    <p className="text-xs text-emerald-600">{(resumeFile.size / 1024).toFixed(1)} KB</p>
+                                </>
+                            ) : (
+                                <>
+                                    <p className="text-sm text-gray-600">Click to upload resume</p>
+                                    <p className="text-xs text-gray-400">PDF only, max 5MB</p>
+                                </>
+                            )}
+                        </div>
+                    </label>
+                </div>
+                {resumeError && <p className="text-red-500 text-sm mt-1">{resumeError}</p>}
             </div>
             <button type="submit" disabled={loading}
                 className="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl transition-all shadow-lg shadow-blue-500/25 disabled:opacity-50">
@@ -197,6 +278,18 @@ const CandidateRow = ({ candidate, onUpdateStatus, onDelete, index }) => (
                     <option value="Reviewed">Reviewed</option>
                     <option value="Hired">Hired</option>
                 </select>
+                {candidate.resumeFilename && (
+                    <button 
+                        onClick={() => {
+                            const token = localStorage.getItem('token');
+                            window.open(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/candidates/${candidate._id}/resume?token=${token}`, '_blank');
+                        }} 
+                        className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
+                        title="View Resume"
+                    >
+                        <IconFileText size={18} />
+                    </button>
+                )}
                 <button 
                     onClick={() => onDelete(candidate._id)} 
                     className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"

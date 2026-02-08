@@ -2,13 +2,14 @@ import Candidate from '../models/CandidateModel.js';
 
 const newCandidate = async (req, res) => {
     try {
-        const {name, email, phone, jobTitle} = req.body;
+        const {name, email, phone, jobTitle, resumeData, resumeFilename} = req.body;
         const candidate = await Candidate.create({
             name,
             email,
             phone,
             jobTitle,
-            resumeUrl: req.file ? req.file.path : null,
+            resumeData: resumeData || null,
+            resumeFilename: resumeFilename || null,
         });
         res.status(201).json({
             success: true,
@@ -132,6 +133,30 @@ const getStats = async (req, res) => {
     }
 }
 
+const getResume = async (req, res) => {
+    try {
+        const candidate = await Candidate.findById(req.params.id);
+        if (!candidate || !candidate.resumeData) {
+            return res.status(404).json({
+                success: false,
+                message: 'Resume not found',
+            });
+        }
+        
+        // Convert base64 to buffer
+        const pdfBuffer = Buffer.from(candidate.resumeData, 'base64');
+        
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `inline; filename="${candidate.resumeFilename || 'resume.pdf'}"`);
+        res.send(pdfBuffer);
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+}
+
 export {
     newCandidate,
     getAlCandidates,
@@ -139,4 +164,5 @@ export {
     updateCandidateStatus,
     deleteCandidate,
     getStats,
+    getResume,
 }

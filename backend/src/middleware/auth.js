@@ -5,8 +5,14 @@ const protect = async (req, res, next) => {
     try {
         let token;
 
+        // Check for token in Authorization header
         if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
             token = req.headers.authorization.split(' ')[1];
+        }
+        
+        // Also check for token in query parameter (for resume viewing in new tab)
+        if (!token && req.query.token) {
+            token = req.query.token;
         }
 
         if (!token) {

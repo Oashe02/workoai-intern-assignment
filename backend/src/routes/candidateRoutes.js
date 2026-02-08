@@ -6,8 +6,8 @@ import {
   updateCandidateStatus,
   deleteCandidate,
   getStats,
+  getResume,
 } from '../controllers/candidateController.js';
-import upload from '../middleware/upload.js';
 import protect from '../middleware/auth.js';
 
 const router = express.Router();
@@ -16,9 +16,10 @@ router.use(protect);
 router.get('/stats', getStats);
 
 // crud
-router.post('/', upload.single('resume'), newCandidate);
+router.post('/', newCandidate);
 router.get('/', getAlCandidates);
 router.get('/:id', getCandidate);
+router.get('/:id/resume', getResume);
 router.put('/:id/status', updateCandidateStatus);
 router.delete('/:id', deleteCandidate);
 
