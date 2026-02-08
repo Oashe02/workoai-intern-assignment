@@ -16,7 +16,7 @@ import {
     IconCalendar,
 } from '@tabler/icons-react';
 
-const TopNavbar = ({ title }) => (
+const TopNavbar = ({ title, user }) => (
     <header className="h-16 border-b border-gray-300 bg-gray-100 flex items-center justify-between px-6">
         <div>
             <h1 className="text-lg font-semibold text-gray-900">{title}</h1>
@@ -27,7 +27,7 @@ const TopNavbar = ({ title }) => (
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
                     <IconUser size={16} className="text-white" />
                 </div>
-                <span className="text-sm text-gray-600">Admin</span>
+                <span className="text-sm text-gray-600">{user?.name || 'Admin'}</span>
             </div>
         </div>
     </header>
@@ -125,7 +125,7 @@ const Candidates = () => {
     const [filter, setFilter] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
 
-    const { logout } = useAuth();
+    const { user, logout } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -187,7 +187,7 @@ const Candidates = () => {
             <AppSidebar onLogout={handleLogout} stats={stats} currentPath={location.pathname} />
 
             <div className="flex-1 flex flex-col overflow-hidden">
-                <TopNavbar title="Candidates" />
+                <TopNavbar title="Candidates" user={user} />
 
                 <main className="flex-1 overflow-y-auto p-6">
                     <div className="mb-6">
@@ -227,7 +227,6 @@ const Candidates = () => {
                         </div>
                     </div>
 
-                    {/* Candidates Grid */}
                     {loading ? (
                         <div className="bg-white border border-gray-200 rounded-xl p-20 flex items-center justify-center">
                             <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin" />

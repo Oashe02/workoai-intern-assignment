@@ -21,7 +21,7 @@ import {
     IconChartBar,
 } from '@tabler/icons-react';
 
-const TopNavbar = ({ title }) => (
+const TopNavbar = ({ title, user }) => (
     <header className="h-16 border-b border-gray-300 bg-gray-100 flex items-center justify-between px-6">
         <div>
             <h1 className="text-lg font-semibold text-gray-900">{title}</h1>
@@ -32,7 +32,7 @@ const TopNavbar = ({ title }) => (
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
                     <IconUser size={16} className="text-white" />
                 </div>
-                <span className="text-sm text-gray-600">Admin</span>
+                <span className="text-sm text-gray-600">{user?.name || 'Admin'}</span>
             </div>
         </div>
     </header>
@@ -81,14 +81,13 @@ const Analytics = () => {
     const [chartData, setChartData] = useState([]);
     const [statusData, setStatusData] = useState([]);
 
-    const { logout } = useAuth();
+    const { user, logout } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
 
     const processChartData = (candidatesData) => {
         if (!candidatesData) return;
 
-        // Process data for trend chart (last 30 days)
         const days = 30;
         const trend = [];
         const today = new Date();
@@ -104,7 +103,6 @@ const Analytics = () => {
         }
         setChartData(trend);
 
-        // Process status data for pie chart
         const statusCounts = candidatesData.reduce((acc, curr) => {
             if (curr.status) {
                 acc[curr.status] = (acc[curr.status] || 0) + 1;
@@ -155,10 +153,8 @@ const Analytics = () => {
         navigate('/login');
     };
 
-    // Calculate conversion rate
     const conversionRate = stats.total > 0 ? ((stats.hired / stats.total) * 100).toFixed(1) : "0.0";
     
-    // Get job title distribution for bar chart
     const jobTitles = candidates.reduce((acc, c) => {
         if (c.jobTitle) {
             acc[c.jobTitle] = (acc[c.jobTitle] || 0) + 1;
@@ -176,7 +172,7 @@ const Analytics = () => {
             <AppSidebar onLogout={handleLogout} stats={stats} currentPath={location.pathname} />
 
             <div className="flex-1 flex flex-col overflow-hidden">
-                <TopNavbar title="Analytics Dashboard" />
+                <TopNavbar title="Analytics Dashboard" user={user} />
 
                 <main className="flex-1 overflow-y-auto p-6">
                     <div className="mb-6 flex justify-between items-end">
@@ -224,9 +220,7 @@ const Analytics = () => {
                                 />
                             </div>
 
-                            {/* Main Charts Row */}
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                {/* Referral Trends Chart */}
                                 <motion.div 
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -262,7 +256,6 @@ const Analytics = () => {
                                     </div>
                                 </motion.div>
 
-                                {/* Pipeline Distribution Chart */}
                                 <motion.div 
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -296,7 +289,6 @@ const Analytics = () => {
                                                 <Legend verticalAlign="bottom" height={36} iconType="circle" />
                                             </PieChart>
                                         </ResponsiveContainer>
-                                        {/* Center Stats */}
                                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[60%] text-center pointer-events-none">
                                             <p className="text-3xl font-bold text-gray-900">{stats.total}</p>
                                             <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Total</p>

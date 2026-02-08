@@ -33,10 +33,7 @@ const Register = () => {
 
     return (
         <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
-            {/* Subtle grid background */}
             <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px]" />
-
-            {/* Subtle gradient orb */}
             <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
 
             <motion.div
@@ -45,9 +42,7 @@ const Register = () => {
                 transition={{ duration: 0.5 }}
                 className="relative z-10 w-full max-w-md"
             >
-                {/* Card */}
                 <div className="bg-zinc-950/80 backdrop-blur-xl rounded-2xl border border-zinc-800/50 p-8 shadow-2xl">
-                    {/* Logo/Brand */}
                     <div className="text-center mb-8">
                         <motion.div
                             initial={{ scale: 0.9 }}
@@ -62,7 +57,6 @@ const Register = () => {
                         <p className="text-zinc-500 text-sm">Get started with your free account</p>
                     </div>
 
-                    {/* Error */}
                     {error && (
                         <motion.div
                             initial={{ opacity: 0, y: -10 }}
@@ -73,7 +67,6 @@ const Register = () => {
                         </motion.div>
                     )}
 
-                    {/* Form */}
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div>
                             <Label htmlFor="name">Name</Label>
@@ -118,7 +111,6 @@ const Register = () => {
                         </Button>
                     </form>
 
-                    {/* Divider */}
                     <div className="relative my-6">
                         <div className="absolute inset-0 flex items-center">
                             <div className="w-full border-t border-zinc-800"></div>
@@ -128,7 +120,6 @@ const Register = () => {
                         </div>
                     </div>
 
-                    {/* Login Link */}
                     <p className="text-center text-sm text-zinc-500">
                         Already have an account?{' '}
                         <Link
@@ -140,7 +131,6 @@ const Register = () => {
                     </p>
                 </div>
 
-                {/* Footer */}
                 <p className="text-center text-xs text-zinc-600 mt-6">
                     Candidate Referral Management System
                 </p>

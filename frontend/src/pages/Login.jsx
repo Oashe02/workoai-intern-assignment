@@ -44,9 +44,7 @@ const Login = () => {
                 transition={{ duration: 0.5 }}
                 className="relative z-10 w-full max-w-md"
             >
-                {/* Card */}
                 <div className="bg-zinc-950/80 backdrop-blur-xl rounded-2xl border border-zinc-800/50 p-8 shadow-2xl">
-                    {/* Logo/Brand */}
                     <div className="text-center mb-8">
                         <motion.div
                             initial={{ scale: 0.9 }}
@@ -59,9 +57,13 @@ const Login = () => {
                         </motion.div>
                         <h1 className="text-2xl font-semibold text-white mb-1">Welcome back</h1>
                         <p className="text-zinc-500 text-sm">Sign in to your account to continue</p>
+                        <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg text-xs text-blue-200 text-center">
+                            <p className="font-semibold mb-1">Demo Credentials:</p>
+                            <p>Email: admin@example.com</p>
+                            <p>Password: password123</p>
+                        </div>
                     </div>
 
-                    {/* Error */}
                     {error && (
                         <motion.div
                             initial={{ opacity: 0, y: -10 }}
@@ -72,7 +74,6 @@ const Login = () => {
                         </motion.div>
                     )}
 
-                    {/* Form */}
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div>
                             <Label htmlFor="email">Email</Label>
@@ -83,6 +84,7 @@ const Login = () => {
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="you@example.com"
                                 required
+                                autoComplete="email"
                             />
                         </div>
 
@@ -95,6 +97,7 @@ const Login = () => {
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="••••••••"
                                 required
+                                autoComplete="current-password"
                             />
                         </div>
 
@@ -103,7 +106,6 @@ const Login = () => {
                         </Button>
                     </form>
 
-                    {/* Divider */}
                     <div className="relative my-6">
                         <div className="absolute inset-0 flex items-center">
                             <div className="w-full border-t border-zinc-800"></div>
@@ -113,7 +115,6 @@ const Login = () => {
                         </div>
                     </div>
 
-                    {/* Register Link */}
                     <p className="text-center text-sm text-zinc-500">
                         Don't have an account?{' '}
                         <Link

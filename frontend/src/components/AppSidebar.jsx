@@ -53,8 +53,7 @@ const AppSidebar = ({ onLogout, stats = { pending: 0, reviewed: 0, hired: 0 }, c
                                 exit={{ opacity: 0, x: -10 }}
                                 transition={{ duration: 0.15 }}
                             >
-                                <h1 className="font-semibold text-gray-900 whitespace-nowrap">WorkoAI</h1>
-                                <p className="text-xs text-gray-400 whitespace-nowrap">Referral System</p>
+                                <p className="whitespace-nowrap">Referral System</p>
                             </motion.div>
                         )}
                     </AnimatePresence>

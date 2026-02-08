@@ -20,7 +20,7 @@ import {
     IconFileText,
 } from '@tabler/icons-react';
 
-const TopNavbar = () => (
+const TopNavbar = ({ user }) => (
     <header className="h-16 border-b border-gray-300 bg-gray-100 flex items-center justify-between px-6">
         <div>
             <h1 className="text-lg font-semibold text-gray-900">Dashboard</h1>
@@ -31,42 +31,23 @@ const TopNavbar = () => (
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
                     <IconUser size={16} className="text-white" />
                 </div>
-                <span className="text-sm text-gray-600">Admin</span>
+                <span className="text-sm text-gray-600">{user?.name || 'Admin'}</span>
             </div>
         </div>
     </header>
 );
 
-const StatCard = ({ label, value, icon: Icon, color, bgColor, trend }) => (
+const StatCard = ({ label, value, icon: Icon, color, bgColor }) => (
     <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        whileHover={{ y: -4, boxShadow: "0 12px 24px -8px rgba(0,0,0,0.15)" }}
-        transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        className="bg-white border border-gray-200 rounded-2xl p-6 cursor-pointer relative overflow-hidden group"
+        whileHover={{ y: -5 }}
+        className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all"
     >
-        <div className={cn(
-            "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300",
-            bgColor
-        )} style={{ opacity: 0.03 }} />
-        
-        <div className="flex items-start justify-between relative z-10">
+        <div className="flex items-center justify-between">
             <div>
                 <p className="text-gray-500 text-sm font-medium">{label}</p>
-                <p className={cn("text-4xl font-bold mt-2", color)}>{value}</p>
-                {trend && (
-                    <div className="flex items-center gap-1.5 mt-3">
-                        <div className="flex items-center gap-1 px-2 py-0.5 bg-emerald-50 rounded-full">
-                            <IconTrendingUp size={12} className="text-emerald-500" />
-                            <span className="text-xs text-emerald-600 font-semibold">{trend}</span>
-                        </div>
-                    </div>
-                )}
+                <p className={cn("text-2xl font-bold mt-1", color)}>{value}</p>
             </div>
-            <div className={cn(
-                "p-3 rounded-xl transition-transform group-hover:scale-110",
-                bgColor
-            )}>
+            <div className={cn("p-3 rounded-xl", bgColor)}>
                 <Icon size={24} className={color} />
             </div>
         </div>
@@ -82,8 +63,8 @@ const StatusBadge = ({ status }) => {
     const { bg, text, dot } = config[status] || config.Pending;
 
     return (
-        <span className={cn("inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border", bg, text)}>
-            <span className={cn("w-2 h-2 rounded-full", dot)} />
+        <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border", bg, text)}>
+            <span className={cn("w-1.5 h-1.5 rounded-full", dot)} />
             {status}
         </span>
     );
@@ -98,22 +79,21 @@ const Modal = ({ isOpen, onClose, title, children }) => (
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     onClick={onClose}
-                    className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
+                    className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 transition-opacity"
                 />
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                    transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                    className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-2xl z-50 shadow-2xl overflow-hidden"
+                    className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white rounded-2xl shadow-xl z-50 p-6 border border-gray-100"
                 >
-                    <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-gray-50">
-                        <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
-                        <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-200 transition-all">
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+                        <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500">
                             <IconX size={20} />
                         </button>
                     </div>
-                    <div className="p-5">{children}</div>
+                    {children}
                 </motion.div>
             </>
         )}
@@ -121,176 +101,154 @@ const Modal = ({ isOpen, onClose, title, children }) => (
 );
 
 const ReferralForm = ({ onSubmit, loading }) => {
-    const [formData, setFormData] = useState({ name: '', email: '', phone: '', jobTitle: '' });
-    const [resumeFile, setResumeFile] = useState(null);
-    const [resumeError, setResumeError] = useState('');
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        jobTitle: '',
+        resume: null
+    });
 
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            if (file.type !== 'application/pdf') {
-                setResumeError('Only PDF files are allowed');
-                setResumeFile(null);
-                return;
-            }
-            if (file.size > 5 * 1024 * 1024) { // 5MB limit
-                setResumeError('File size must be less than 5MB');
-                setResumeFile(null);
-                return;
-            }
-            setResumeError('');
-            setResumeFile(file);
-        }
-    };
-
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-        
-        let resumeData = null;
-        let resumeFilename = null;
-        
-        if (resumeFile) {
-            // Convert file to base64
-            const reader = new FileReader();
-            resumeData = await new Promise((resolve) => {
-                reader.onload = () => {
-                    const base64 = reader.result.split(',')[1]; // Remove data:application/pdf;base64, prefix
-                    resolve(base64);
-                };
-                reader.readAsDataURL(resumeFile);
-            });
-            resumeFilename = resumeFile.name;
-        }
-        
-        onSubmit({ ...formData, resumeData, resumeFilename });
+        const data = new FormData();
+        Object.keys(formData).forEach(key => data.append(key, formData[key]));
+        onSubmit(data);
     };
-
-    const inputClass = "w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all";
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-                <input type="text" required placeholder="John Smith" value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })} className={inputClass} />
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Job Title</label>
-                <input type="text" required placeholder="Software Engineer" value={formData.jobTitle}
-                    onChange={(e) => setFormData({ ...formData, jobTitle: e.target.value })} className={inputClass} />
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                <input type="email" required placeholder="john@company.com" value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })} className={inputClass} />
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
-                <input type="tel" required placeholder="+1 (555) 000-0000" value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className={inputClass} />
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Resume (PDF)</label>
-                <div className="relative">
-                    <input 
-                        type="file" 
-                        accept=".pdf,application/pdf"
-                        onChange={handleFileChange}
-                        className="hidden"
-                        id="resume-upload"
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                    <input
+                        required
+                        type="text"
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all"
+                        placeholder="Oashe Mehta"
+                        value={formData.name}
+                        onChange={e => setFormData({ ...formData, name: e.target.value })}
                     />
-                    <label 
-                        htmlFor="resume-upload"
-                        className={cn(
-                            "flex items-center gap-3 w-full px-4 py-3 bg-gray-50 border border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition-all",
-                            resumeFile && "border-emerald-400 bg-emerald-50/50"
-                        )}
-                    >
-                        <div className={cn(
-                            "w-10 h-10 rounded-lg flex items-center justify-center",
-                            resumeFile ? "bg-emerald-100" : "bg-gray-200"
-                        )}>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke={resumeFile ? "#059669" : "#6B7280"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                <polyline points="14,2 14,8 20,8" stroke={resumeFile ? "#059669" : "#6B7280"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                        </div>
-                        <div className="flex-1">
-                            {resumeFile ? (
-                                <>
-                                    <p className="text-sm font-medium text-emerald-700">{resumeFile.name}</p>
-                                    <p className="text-xs text-emerald-600">{(resumeFile.size / 1024).toFixed(1)} KB</p>
-                                </>
-                            ) : (
-                                <>
-                                    <p className="text-sm text-gray-600">Click to upload resume</p>
-                                    <p className="text-xs text-gray-400">PDF only, max 5MB</p>
-                                </>
-                            )}
-                        </div>
-                    </label>
                 </div>
-                {resumeError && <p className="text-red-500 text-sm mt-1">{resumeError}</p>}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Job Title</label>
+                    <input
+                        required
+                        type="text"
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all"
+                        placeholder="Software Engineer"
+                        value={formData.jobTitle}
+                        onChange={e => setFormData({ ...formData, jobTitle: e.target.value })}
+                    />
+                </div>
             </div>
-            <button type="submit" disabled={loading}
-                className="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl transition-all shadow-lg shadow-blue-500/25 disabled:opacity-50">
-                {loading ? 'Adding...' : 'Add Referral'}
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input
+                        required
+                        type="email"
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all"
+                        placeholder="OAshe@gmail.com"
+                        value={formData.email}
+                        onChange={e => setFormData({ ...formData, email: e.target.value })}
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                    <input
+                        required
+                        type="tel"
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all"
+                        placeholder="9876543210"
+                        value={formData.phone}
+                        onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                    />
+                </div>
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Resume (PDF)</label>
+                <div className="relative">
+                    <input
+                        required
+                        type="file"
+                        accept=".pdf"
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all text-sm text-gray-500"
+                        onChange={e => setFormData({ ...formData, resume: e.target.files[0] })}
+                    />
+                </div>
+            </div>
+            <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 mt-6 shadow-lg shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+                {loading ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                    <>
+                        <IconPlus size={18} />
+                        Submit Referral
+                    </>
+                )}
             </button>
         </form>
     );
 };
 
-const CandidateRow = ({ candidate, onUpdateStatus, onDelete, index }) => (
+const CandidateRow = ({ candidate, index, onUpdateStatus, onDelete }) => (
     <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.05 }}
-        whileHover={{ scale: 1.01 }}
-        className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg hover:border-gray-300 transition-all"
+        className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between hover:shadow-md transition-all group"
     >
-        <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-                <div className="w-11 h-11 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold shadow-lg shadow-blue-500/25">
-                    {candidate.name.charAt(0)}
-                </div>
-                <div>
-                    <p className="font-semibold text-gray-900">{candidate.name}</p>
-                    <p className="text-sm text-gray-500">{candidate.jobTitle}</p>
-                </div>
+        <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm shadow-md shadow-blue-500/20">
+                {candidate.name.charAt(0)}
             </div>
-            <div className="flex items-center gap-6">
-                <div className="text-right hidden md:block">
-                    <p className="text-sm text-gray-600">{candidate.email}</p>
-                    <p className="text-xs text-gray-400">{candidate.phone}</p>
-                </div>
-                <StatusBadge status={candidate.status} />
-                <select
-                    value={candidate.status}
-                    onChange={(e) => onUpdateStatus(candidate._id, e.target.value)}
-                    className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-600 focus:outline-none focus:border-blue-500 cursor-pointer"
-                >
-                    <option value="Pending">Pending</option>
-                    <option value="Reviewed">Reviewed</option>
-                    <option value="Hired">Hired</option>
-                </select>
-                {candidate.resumeFilename && (
-                    <button 
-                        onClick={() => {
-                            const token = localStorage.getItem('token');
-                            window.open(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/candidates/${candidate._id}/resume?token=${token}`, '_blank');
-                        }} 
-                        className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all"
-                        title="View Resume"
+            <div>
+                <h3 className="font-semibold text-gray-900">{candidate.name}</h3>
+                <p className="text-sm text-gray-500">{candidate.jobTitle}</p>
+            </div>
+        </div>
+        
+        <div className="flex items-center gap-6">
+            <StatusBadge status={candidate.status} />
+            <div className="flex items-center gap-4 text-sm text-gray-500">
+                <span className="hidden sm:block">{new Date(candidate.createdAt).toLocaleDateString()}</span>
+                <div className="flex items-center gap-2">
+                    <select
+                        value={candidate.status}
+                        onChange={(e) => onUpdateStatus(candidate._id, e.target.value)}
+                        className="bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-blue-500 cursor-pointer"
                     >
-                        <IconFileText size={18} />
+                        <option value="Pending">Pending</option>
+                        <option value="Reviewed">Reviewed</option>
+                        <option value="Hired">Hired</option>
+                    </select>
+                    
+                    {candidate.resumeFilename && (
+                        <button 
+                            onClick={() => {
+                                const token = localStorage.getItem('token');
+                                window.open(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/candidates/${candidate._id}/resume?token=${token}`, '_blank');
+                            }}
+                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="View Resume"
+                        >
+                            <IconFileText size={18} />
+                        </button>
+                    )}
+                    
+                    <button 
+                        onClick={() => onDelete(candidate._id)}
+                        className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Delete"
+                    >
+                        <IconTrash size={18} />
                     </button>
-                )}
-                <button 
-                    onClick={() => onDelete(candidate._id)} 
-                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                >
-                    <IconTrash size={18} />
-                </button>
+                </div>
             </div>
         </div>
     </motion.div>
@@ -304,8 +262,10 @@ const Dashboard = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [formLoading, setFormLoading] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [candidateToDelete, setCandidateToDelete] = useState(null);
 
-    const { logout } = useAuth();
+    const { user, logout } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -354,11 +314,22 @@ const Dashboard = () => {
         fetchStats();
     };
 
-    const deleteCandidate = async (id) => {
-        if (!confirm('Delete this candidate?')) return;
-        await api.delete(`/api/candidates/${id}`);
-        fetchCandidates();
-        fetchStats();
+    const deleteCandidate = (id) => {
+        setCandidateToDelete(id);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!candidateToDelete) return;
+        try {
+            await api.delete(`/api/candidates/${candidateToDelete}`);
+            await Promise.all([fetchCandidates(), fetchStats()]);
+            setIsDeleteModalOpen(false);
+            setCandidateToDelete(null);
+        } catch (err) {
+            console.error(err);
+            alert('Failed to delete candidate');
+        }
     };
 
     const handleLogout = () => {
@@ -377,7 +348,8 @@ const Dashboard = () => {
             <AppSidebar onLogout={handleLogout} stats={stats} currentPath={location.pathname} />
 
             <div className="flex-1 flex flex-col overflow-hidden">
-                <TopNavbar />
+                <TopNavbar user={user} />
+
 
                 <main className="flex-1 overflow-y-auto p-6">
                     <div className="flex items-center justify-between mb-8">
@@ -488,6 +460,29 @@ const Dashboard = () => {
 
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add New Referral">
                 <ReferralForm onSubmit={addCandidate} loading={formLoading} />
+            </Modal>
+
+            <Modal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} title="Confirm Deletion">
+                <div className="space-y-4">
+                    <p className="text-gray-600">
+                        Are you sure you want to delete this candidate? This action cannot be undone.
+                    </p>
+                    <div className="flex justify-end gap-3 mt-6">
+                        <button 
+                            onClick={() => setIsDeleteModalOpen(false)}
+                            className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors font-medium"
+                        >
+                            Cancel
+                        </button>
+                        <button 
+                            onClick={confirmDelete}
+                            className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium shadow-lg shadow-red-500/20"
+                        >
+                            <IconTrash size={18} />
+                            Delete Candidate
+                        </button>
+                    </div>
+                </div>
             </Modal>
         </div>
     );
