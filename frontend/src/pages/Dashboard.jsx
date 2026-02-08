@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import api from '../api/axios';
 import { cn } from '@/lib/utils';
@@ -13,7 +13,6 @@ import {
     IconClock,
     IconEye,
     IconCircleCheck,
-    IconBell,
     IconUser,
     IconUsers,
     IconArrowUpRight,
@@ -27,10 +26,6 @@ const TopNavbar = () => (
             <h1 className="text-lg font-semibold text-gray-900">Dashboard</h1>
         </div>
         <div className="flex items-center gap-4">
-            <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors relative">
-                <IconBell size={20} />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-500 rounded-full" />
-            </button>
             <div className="h-8 w-px bg-gray-300" />
             <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
@@ -312,6 +307,7 @@ const Dashboard = () => {
 
     const { logout } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
 
     const fetchCandidates = async () => {
         try {
@@ -378,7 +374,7 @@ const Dashboard = () => {
 
     return (
         <div className="flex h-screen bg-gray-200 text-gray-900 overflow-hidden">
-            <AppSidebar onLogout={handleLogout} stats={stats} />
+            <AppSidebar onLogout={handleLogout} stats={stats} currentPath={location.pathname} />
 
             <div className="flex-1 flex flex-col overflow-hidden">
                 <TopNavbar />
@@ -407,7 +403,6 @@ const Dashboard = () => {
                             icon={IconUsers} 
                             color="text-gray-900" 
                             bgColor="bg-gray-100"
-                            trend="+12%"
                         />
                         <StatCard 
                             label="Pending" 
@@ -429,7 +424,6 @@ const Dashboard = () => {
                             icon={IconCircleCheck} 
                             color="text-emerald-500" 
                             bgColor="bg-emerald-100"
-                            trend="+3"
                         />
                     </div>
 

@@ -1,24 +1,23 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
 import {
     IconHome,
     IconUsers,
     IconChartBar,
-    IconSettings,
     IconLogout,
     IconChevronLeft,
     IconChevronRight,
 } from '@tabler/icons-react';
 
-const AppSidebar = ({ onLogout, stats = { pending: 0, reviewed: 0, hired: 0 } }) => {
+const AppSidebar = ({ onLogout, stats = { pending: 0, reviewed: 0, hired: 0 }, currentPath = '/dashboard' }) => {
     const [collapsed, setCollapsed] = useState(false);
 
     const navItems = [
-        { icon: IconHome, label: 'Dashboard', href: '#', active: true },
-        { icon: IconUsers, label: 'Candidates', href: '#', active: false },
-        { icon: IconChartBar, label: 'Analytics', href: '#', active: false },
-        { icon: IconSettings, label: 'Settings', href: '#', active: false },
+        { icon: IconHome, label: 'Dashboard', href: '/dashboard' },
+        { icon: IconUsers, label: 'Candidates', href: '/candidates' },
+        { icon: IconChartBar, label: 'Analytics', href: '/analytics' },
     ];
 
     return (
@@ -28,7 +27,6 @@ const AppSidebar = ({ onLogout, stats = { pending: 0, reviewed: 0, hired: 0 } })
             transition={{ duration: 0.2, ease: 'easeInOut' }}
             className="h-screen bg-gray-100 border-r border-gray-300 flex flex-col relative"
         >
-            {/* Toggle Button */}
             <button
                 onClick={() => setCollapsed(!collapsed)}
                 className="absolute -right-3 top-7 w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors z-10 shadow-sm"
@@ -36,12 +34,10 @@ const AppSidebar = ({ onLogout, stats = { pending: 0, reviewed: 0, hired: 0 } })
                 {collapsed ? <IconChevronRight size={14} /> : <IconChevronLeft size={14} />}
             </button>
 
-            {/* Header / Logo */}
             <div className="p-5 border-b border-gray-100">
                 <div className="flex items-center gap-3 overflow-hidden">
                     <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-500 flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/25">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            {/* Network/Connection logo representing referrals */}
                             <circle cx="12" cy="5" r="2.5" fill="white" />
                             <circle cx="5" cy="18" r="2.5" fill="white" />
                             <circle cx="19" cy="18" r="2.5" fill="white" />
@@ -64,49 +60,51 @@ const AppSidebar = ({ onLogout, stats = { pending: 0, reviewed: 0, hired: 0 } })
                     </AnimatePresence>
                 </div>
             </div>
+                            
+            <div className="my-2 h-px bg-gray-100" />
 
-            {/* Navigation */}
             <nav className="flex-1 p-3 overflow-hidden">
                 <div className="space-y-1">
-                    {navItems.map((item, idx) => (
-                        <a
-                            key={idx}
-                            href={item.href}
-                            className={cn(
-                                "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group",
-                                item.active
-                                    ? "bg-blue-50 text-blue-600"
-                                    : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
-                            )}
-                        >
-                            <item.icon
-                                size={20}
+                    {navItems.map((item, idx) => {
+                        const isActive = currentPath === item.href;
+                        return (
+                            <Link
+                                key={idx}
+                                to={item.href}
                                 className={cn(
-                                    "shrink-0 transition-colors",
-                                    item.active ? "text-blue-600" : "text-gray-400 group-hover:text-gray-600"
+                                    "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group",
+                                    isActive
+                                        ? "bg-blue-50 text-blue-600"
+                                        : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
                                 )}
-                            />
-                            <AnimatePresence>
-                                {!collapsed && (
-                                    <motion.span
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, x: -10 }}
-                                        transition={{ duration: 0.15 }}
-                                        className="text-sm font-medium whitespace-nowrap"
-                                    >
-                                        {item.label}
-                                    </motion.span>
-                                )}
-                            </AnimatePresence>
-                        </a>
-                    ))}
+                            >
+                                <item.icon
+                                    size={20}
+                                    className={cn(
+                                        "shrink-0 transition-colors",
+                                        isActive ? "text-blue-600" : "text-gray-400 group-hover:text-gray-600"
+                                    )}
+                                />
+                                <AnimatePresence>
+                                    {!collapsed && (
+                                        <motion.span
+                                            initial={{ opacity: 0, x: -10 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: -10 }}
+                                            transition={{ duration: 0.15 }}
+                                            className="text-sm font-medium whitespace-nowrap"
+                                        >
+                                            {item.label}
+                                        </motion.span>
+                                    )}
+                                </AnimatePresence>
+                            </Link>
+                        );
+                    })}
                 </div>
 
-                {/* Divider */}
                 <div className="my-4 h-px bg-gray-100" />
 
-                {/* Quick Stats Preview */}
                 <AnimatePresence>
                     {!collapsed && (
                         <motion.div

@@ -3,6 +3,8 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Candidates from './pages/Candidates';
+import Analytics from './pages/Analytics';
 
 const ProtectedRoute = ({ children }) => {
     const { isAuthenticated, loading } = useAuth();
@@ -45,6 +47,12 @@ function App() {
                     } />
                     <Route path="/dashboard" element={
                         <ProtectedRoute><Dashboard /></ProtectedRoute>
+                    } />
+                    <Route path="/candidates" element={
+                        <ProtectedRoute><Candidates /></ProtectedRoute>
+                    } />
+                    <Route path="/analytics" element={
+                        <ProtectedRoute><Analytics /></ProtectedRoute>
                     } />
                     <Route path="/" element={<Navigate to="/dashboard" />} />
                 </Routes>
