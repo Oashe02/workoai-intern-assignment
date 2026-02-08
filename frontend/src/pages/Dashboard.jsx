@@ -378,7 +378,7 @@ const Dashboard = () => {
 
     return (
         <div className="flex h-screen bg-gray-200 text-gray-900 overflow-hidden">
-            <AppSidebar onLogout={handleLogout} />
+            <AppSidebar onLogout={handleLogout} stats={stats} />
 
             <div className="flex-1 flex flex-col overflow-hidden">
                 <TopNavbar />

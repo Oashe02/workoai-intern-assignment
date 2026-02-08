@@ -11,7 +11,7 @@ import {
     IconChevronRight,
 } from '@tabler/icons-react';
 
-const AppSidebar = ({ onLogout }) => {
+const AppSidebar = ({ onLogout, stats = { pending: 0, reviewed: 0, hired: 0 } }) => {
     const [collapsed, setCollapsed] = useState(false);
 
     const navItems = [
@@ -119,15 +119,15 @@ const AppSidebar = ({ onLogout }) => {
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
                                     <span className="text-xs text-gray-500">Pending</span>
-                                    <span className="text-xs font-semibold text-amber-500">12</span>
+                                    <span className="text-xs font-semibold text-amber-500">{stats.pending}</span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-xs text-gray-500">Reviewed</span>
-                                    <span className="text-xs font-semibold text-blue-500">8</span>
+                                    <span className="text-xs font-semibold text-blue-500">{stats.reviewed}</span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-xs text-gray-500">Hired</span>
-                                    <span className="text-xs font-semibold text-emerald-500">5</span>
+                                    <span className="text-xs font-semibold text-emerald-500">{stats.hired}</span>
                                 </div>
                             </div>
                         </motion.div>
