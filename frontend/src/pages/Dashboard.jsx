@@ -260,6 +260,8 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
+    const [longLoading, setLongLoading] = useState(false);
+    const [error, setError] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [formLoading, setFormLoading] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -273,7 +275,11 @@ const Dashboard = () => {
         try {
             const res = await api.get('/api/candidates');
             setCandidates(res.data.data);
-        } catch (err) { console.error(err); }
+            setError(null);
+        } catch (err) {
+            console.error(err);
+            setError("Failed to load candidates.");
+        }
     };
 
     const fetchStats = async () => {
@@ -291,8 +297,11 @@ const Dashboard = () => {
     useEffect(() => {
         const load = async () => {
             setLoading(true);
+            const timer = setTimeout(() => setLongLoading(true), 3000);
             await Promise.all([fetchCandidates(), fetchStats()]);
+            clearTimeout(timer);
             setLoading(false);
+            setLongLoading(false);
         };
         load();
     }, []);
@@ -432,8 +441,17 @@ const Dashboard = () => {
 
                     <div className="space-y-3">
                         {loading ? (
-                            <div className="bg-white border border-gray-200 rounded-xl p-20 flex items-center justify-center">
-                                <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                            <div className="bg-white border border-gray-200 rounded-xl p-20 flex items-center justify-center flex-col">
+                                <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin mb-4" />
+                                {longLoading && (
+                                    <p className="text-gray-500 text-sm">
+                                        Waking up the server... This may take up to a minute on the first load.
+                                    </p>
+                                )}
+                            </div>
+                        ) : error ? (
+                             <div className="bg-red-50 border border-red-200 rounded-xl p-20 text-center">
+                                <p className="text-red-600 font-medium">{error}</p>
                             </div>
                         ) : filtered.length === 0 ? (
                             <div className="bg-white border border-gray-200 rounded-xl p-20 text-center">

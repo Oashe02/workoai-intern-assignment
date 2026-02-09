@@ -124,6 +124,8 @@ const Candidates = () => {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
+    const [error, setError] = useState(null);
+    const [longLoading, setLongLoading] = useState(false);
 
     const { user, logout } = useAuth();
     const navigate = useNavigate();
@@ -133,7 +135,11 @@ const Candidates = () => {
         try {
             const res = await api.get('/api/candidates');
             setCandidates(res.data.data);
-        } catch (err) { console.error(err); }
+            setError(null);
+        } catch (err) {
+            console.error(err);
+            setError("Failed to load candidates. Please try reloading.");
+        }
     };
 
     const fetchStats = async () => {
@@ -151,8 +157,13 @@ const Candidates = () => {
     useEffect(() => {
         const load = async () => {
             setLoading(true);
+            const timer = setTimeout(() => setLongLoading(true), 3000);
+            
             await Promise.all([fetchCandidates(), fetchStats()]);
+            
+            clearTimeout(timer);
             setLoading(false);
+            setLongLoading(false);
         };
         load();
     }, []);
@@ -230,6 +241,21 @@ const Candidates = () => {
                     {loading ? (
                         <div className="bg-white border border-gray-200 rounded-xl p-20 flex items-center justify-center">
                             <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                            {longLoading && (
+                                <p className="ml-4 text-gray-500 text-sm">
+                                    Waking up the server... This may take up to a minute on the first load.
+                                </p>
+                            )}
+                        </div>
+                    ) : error ? (
+                        <div className="bg-red-50 border border-red-200 rounded-xl p-20 text-center">
+                            <p className="text-red-600 font-medium">{error}</p>
+                            <button 
+                                onClick={() => window.location.reload()}
+                                className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition"
+                            >
+                                Reload Page
+                            </button>
                         </div>
                     ) : filtered.length === 0 ? (
                         <div className="bg-white border border-gray-200 rounded-xl p-20 text-center">
